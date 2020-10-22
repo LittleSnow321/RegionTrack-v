@@ -1,0 +1,2 @@
+jython9total: 0
+jython9avg: 0.0

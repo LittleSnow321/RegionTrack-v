@@ -1,0 +1,2 @@
+pmd9 total non-s trace: 0
+pmd9 avg non-s trace: 0.0

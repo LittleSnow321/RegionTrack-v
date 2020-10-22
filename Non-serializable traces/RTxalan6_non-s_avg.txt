@@ -1,0 +1,2 @@
+xalan6 total non-s trace: 100
+xalan6 avg non-s trace: 1.0

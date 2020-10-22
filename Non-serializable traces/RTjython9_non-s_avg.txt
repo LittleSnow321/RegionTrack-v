@@ -1,0 +1,2 @@
+jython9 total non-s trace: 0
+jython9 avg non-s trace: 0.0

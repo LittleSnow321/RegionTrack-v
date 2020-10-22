@@ -1,0 +1,2 @@
+lusearch6 total non-s trace: 100
+lusearch6 avg non-s trace: 1.0

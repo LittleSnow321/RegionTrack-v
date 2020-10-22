@@ -1,0 +1,2 @@
+sunflow9 total non-s trace: 100
+sunflow9 avg non-s trace: 1.0

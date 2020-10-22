@@ -1,0 +1,2 @@
+lusearch6total: 102
+lusearch6avg: 1.02

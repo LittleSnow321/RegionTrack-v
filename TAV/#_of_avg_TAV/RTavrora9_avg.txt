@@ -1,0 +1,2 @@
+avrora9total: 2005
+avrora9avg: 20.05

@@ -1,0 +1,2 @@
+xalan6total: 6042
+xalan6avg: 60.42

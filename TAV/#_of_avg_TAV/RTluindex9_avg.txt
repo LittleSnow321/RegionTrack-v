@@ -1,0 +1,2 @@
+luindex9total: 0
+luindex9avg: 0.0

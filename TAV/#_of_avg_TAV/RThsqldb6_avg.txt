@@ -1,0 +1,2 @@
+hsqldb6total: 402
+hsqldb6avg: 4.02

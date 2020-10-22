@@ -1,0 +1,2 @@
+lusearch9-fixedtotal: 1756
+lusearch9-fixedavg: 17.56

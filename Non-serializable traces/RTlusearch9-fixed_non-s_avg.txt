@@ -1,0 +1,2 @@
+lusearch9-fixed total non-s trace: 100
+lusearch9-fixed avg non-s trace: 1.0

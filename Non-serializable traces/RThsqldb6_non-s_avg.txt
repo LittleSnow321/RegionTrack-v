@@ -1,0 +1,2 @@
+hsqldb6 total non-s trace: 100
+hsqldb6 avg non-s trace: 1.0
