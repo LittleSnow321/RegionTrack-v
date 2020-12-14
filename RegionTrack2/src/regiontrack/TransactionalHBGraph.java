@@ -134,15 +134,15 @@ public class TransactionalHBGraph {
 				{
 					if (buildHB(lastWrite, currRead))  //create write-read edge
 					{
-						VC.copy(currRead.currVC, threadState.currVC); //update current clock of current transaction as the current clock of this thread
-					}												  //thread clock has been updated, create subregion
+						createSubregion(currRead.currVC, threadState.currVC);//update current clock of current transaction as the current clock of this thread
+						 //thread clock has been updated, create subregion
+					}												 
 				}
 				
 			}
 			VC read = new VC(threadid);
 			VC.copy(read, currRead.currVC);  //update last read
 			MemVar.readVCMap.set(threadid - 1, read);
-			//VC.copy(MemVar.readVCMap.get(threadid - 1), currRead.currVC);  //update last read operation
 			if(!MemVar.setRead)
 			{
 				MemVar.setRead = true;
@@ -154,7 +154,6 @@ public class TransactionalHBGraph {
 			VC read = new VC(threadid);
 			VC.copy(read, currRead.currVC);  //update last read
 			MemVar.readVCMap.set(threadid - 1, read);
-			//MemVar.writeVC.setTid(threadid);
 			MemVar.setRead = true;
 			this.MemoryMap.put(address, MemVar);
 		}
@@ -181,7 +180,7 @@ public class TransactionalHBGraph {
 					{
 						if(buildHB(MemVar.readVCMap.get(id - 1), currWrite))  //create read-write edges
 						{
-							VC.copy(currWrite.currVC, threadState.currVC);//thread clock has been updated, create subregion
+							createSubregion(currWrite.currVC, threadState.currVC);//thread clock has been updated, create subregion
 						}
 					}
 				}
@@ -203,7 +202,7 @@ public class TransactionalHBGraph {
 					{
 						if(buildHB(lastWrite, currWrite)) 
 						{
-							VC.copy(currWrite.currVC, threadState.currVC);//thread clock has been updated, create subregion
+							createSubregion(currWrite.currVC, threadState.currVC);//thread clock has been updated, create subregion
 						}
 					}
 				}
@@ -217,7 +216,6 @@ public class TransactionalHBGraph {
 			MemoryData MemVar = new MemoryData(address);
 			MemVar.writeVC = new VC(threadid);
 			VC.copy(MemVar.writeVC, currWrite.currVC);
-			//MemVar.writeVC.setTid(threadid);
 			this.MemoryMap.put(address, MemVar);
 		}
 		
@@ -245,7 +243,7 @@ public class TransactionalHBGraph {
 				{
 					if(buildHB(lastRel, currentAcq)) 
 					{
-						VC.copy(currentAcq.currVC, threadState.currVC); //thread clock has been updated, create subregion
+						createSubregion(currentAcq.currVC, threadState.currVC); //thread clock has been updated, create subregion
 					}
 				}
 			}
@@ -254,7 +252,6 @@ public class TransactionalHBGraph {
 		else  //this is the first access to this lock
 		{
 			LockData LockVar = new LockData(address); 
-			//LockVar.clock.setTid(threadid);
 			this.LockMap.put(address, LockVar);
 		}
 		
@@ -278,13 +275,18 @@ public class TransactionalHBGraph {
 		
 	}
 	
+	public boolean createSubregion(VC vc1, VC vc2) //created a new subregion
+	{
+		VC.copy(vc1, vc2); 
+		return true;
+	}
+	
 	public boolean buildHB(VC source, Transaction dest)
 	{
 		int sourceID = source.getTid();
 		int destID = dest.threadid;
 		if(!needHB(sourceID, destID))
 		    return false;
-		//System.out.println(sourceID);
 		RVMThread threadState = this.ThreadMap.get(destID - 1);
 		boolean updated = VC.join(threadState.currVC, source);  //update the clock by join operation
 		//update TVC
@@ -297,11 +299,11 @@ public class TransactionalHBGraph {
 			{
 				this.DetectList.add(dest.siteID);
 			}
+			System.out.println("*********RT-V1************");
+			System.out.println(dest.siteID);
+			System.out.println("**************************");
 			if(!threadState.TransactionList.contains(dest.transactionID))
 			{
-				System.out.println("*********RT-V1************");
-				System.out.println(dest.siteID);
-				System.out.println("**************************");
 				threadState.TransactionList.add(dest.transactionID);
 			}
 		}
@@ -319,23 +321,24 @@ public class TransactionalHBGraph {
 		RVMThread sourceState = this.ThreadMap.get(sourceID - 1);
 		int sourceC = source.clock[sourceID];
 		int sinkC = destState.currVC.clock[destID];
-		ArrayList<Integer> Tids = new ArrayList<Integer>();
+		ArrayList<Integer> Tids11 = new ArrayList<Integer>();
+		ArrayList<Integer> Tids12 = new ArrayList<Integer>();
 		if(sourceState.reverVC.clock[sourceID] == sourceC) //same source transaction
 		{
 			if(sourceState.reverVC.clock[destID] == 0 || sourceState.reverVC.clock[destID] > sinkC)
 			{
 				sourceState.reverVC.clock[destID] = sinkC;
 			}
-			forwardPropagate(Tids, sourceID, destID);
-			backPropagate(Tids, sourceID, destID, sourceC, sinkC);
+			forwardPropagate(Tids11, sourceID, destID);
+			backPropagate(Tids12, sourceID, destID, sourceC, sinkC);
 		}
 		else if(sourceState.reverVC.clock[sourceID] < sourceC)
 		{
 			sourceState.reverVC.initialVC();
 			sourceState.reverVC.clock[sourceID] = sourceC;
 			sourceState.reverVC.clock[destID] = sinkC;
-			forwardPropagate(Tids, sourceID, destID);
-			backPropagate(Tids, sourceID, destID, sourceC, sinkC);
+			forwardPropagate(Tids11, sourceID, destID);
+			backPropagate(Tids12, sourceID, destID, sourceC, sinkC);
 		}
 		
 	}
@@ -391,7 +394,7 @@ public class TransactionalHBGraph {
 					{
 						threadState1.reverVC.clock[destID] = sink;
 					}
-					forwardPropagate(Tids, id, destID); //update TVC of thread (id)
+					forwardPropagate(new ArrayList<Integer>(), id, destID); //update TVC of thread (id)
 					Tid1 = backPropagate(Tid1, id, destID, threadState1.reverVC.clock[id], sink); //back propagate to other threads
 				}
 			}
